@@ -5,6 +5,7 @@ import glob
 import subprocess
 import time
 from hashlib import sha1
+import json
 
 commands = {
     '.cpp': 'g++ {filename} -o {runame} -O2 -Wall -static -std=gnu++20 -Wfatal-errors',
@@ -74,6 +75,7 @@ def run(filename, testcase_directory, no_subdirectory, runtime, timelimit):
 
     maxtime = 0
     align_length = max([len(s) for s in input_paths]) - len(testcase_directory) - 3
+    wa_list = []
     for input_path in input_paths:
         output_path = input_path[:-3] + '.out'
         answer_path = input_path[:-3] + '.ans'
@@ -95,10 +97,21 @@ def run(filename, testcase_directory, no_subdirectory, runtime, timelimit):
             click.secho('? (no ans data)', fg='bright_black', nl=False)
         elif os.system(f'diff -wB {output_path} {answer_path} > /dev/null') != 0:
             click.secho('WA  ', fg='bright_red', nl=False)
+            wa_list.append(tc_name)
         else:
             click.secho('AC  ', fg='bright_green', nl=False)
         click.echo(f'{tc_time}ms')
     click.secho(f'Maximum Time: {maxtime}ms', fg='bright_white')
+
+    recent_path = os.path.join(os.path.dirname(filename), '.tmp/recent')
+    recent = {
+        'problem_name': name,
+        'testcase_directory': os.path.abspath(testcase_directory),
+        'wa_list': wa_list,
+    }
+    with open(recent_path, 'w') as f:
+        json.dump(recent, f)
+
 
 if __name__ == '__main__':
     run()
