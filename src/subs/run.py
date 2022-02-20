@@ -68,8 +68,8 @@ def run(filename, testcase_directory, no_subdirectory, runtime, timelimit):
         click.secho('No input data!', fg='bright_red')
         runtime = True
     if runtime:
-        click.secho('Runtime Mode', fg='bright_cyan')
-        os.system('./run')
+        click.secho(f'Runtime Mode ({runame})', fg='bright_cyan')
+        os.system(runame)
         return
 
     maxtime = 0
