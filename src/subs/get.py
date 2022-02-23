@@ -6,6 +6,10 @@ import re
 import os
 from bs4 import BeautifulSoup
 
+headers = {
+    'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.82 Safari/537.36"
+}
+
 sources = {
     'boj': {
         'url': 'https://acmicpc.net/problem/%s',
@@ -32,7 +36,7 @@ def get(source, problem, testcase_directory, no_subdirectory):
     """Fetch testcase"""
     src = guess_src(source)
     problem = re.sub('(_.*)|(\..*)', '', problem)
-    webpage = requests.get(src['url']%problem)
+    webpage = requests.get(src['url']%problem, headers=headers)
     soup = BeautifulSoup(webpage.content, 'html.parser')
     INS = soup.find_all(attrs=src['input'])
     ANS = soup.find_all(attrs=src['ans'])
