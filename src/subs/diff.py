@@ -8,9 +8,8 @@ import json
 @click.option('-y', is_flag=True, help='do not ask')
 def diff(tool, y):
     """Diff Recent WAs"""
-    f = open('.tmp/recent', 'r')
-    recent = json.load(f)
-    f.close()
+    with open('.tmp/recent', 'r') as f:
+      recent = json.load(f)
 
     problem_name = recent['problem_name']
     testcase_directory = recent['testcase_directory']
