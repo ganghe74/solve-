@@ -23,6 +23,9 @@ def compile(filename):
     if ext not in commands:
         raise click.ClickException(f'Cannot find compile command ({ext})')
 
+    # TODO
+    # To reduce compile, formatting source code before hashing would be good idea.
+
     # Hash
     with open(filename, 'rb') as f:
         data = f.read()
@@ -56,9 +59,8 @@ def run(filename, testcase_directory, no_subdirectory, runtime, timelimit):
     runame = compile(filename)
 
     name, ext = os.path.splitext(filename)
+    name = (name+' ')[:name.find('_')]
 
-    if '_' in name:
-        name = name[:name.find('_')]
     if not no_subdirectory:
         testcase_directory = os.path.join(testcase_directory, name)
     testcase_directory.rstrip('/')
