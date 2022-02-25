@@ -46,7 +46,7 @@ def compile(filename):
 
 
 @click.command()
-@click.argument('filename', type=click.Path(exists=True))
+@click.argument('filename', type=click.Path(), default="")
 @click.option('--testcase-directory', '-tc', default='testcase', type=click.Path(),
               help='testcase directory')
 @click.option('--no-subdirectory', '-N', is_flag = True,
@@ -56,6 +56,10 @@ def compile(filename):
 @click.option('--timelimit', '-t', default=3, help='time limit')
 def run(filename, testcase_directory, no_subdirectory, runtime, timelimit):
     """Simple Judge Tool"""
+    if not filename or filename == '.':
+        with open('.tmp/recent', 'r') as f:
+            filename = json.load(f)['source_path']
+
     runame = compile(filename)
 
     name, ext = os.path.splitext(filename)
@@ -108,6 +112,7 @@ def run(filename, testcase_directory, no_subdirectory, runtime, timelimit):
     recent_path = os.path.join(os.path.dirname(filename), '.tmp/recent')
     recent = {
         'problem_name': name,
+        'source_path': os.path.abspath(filename),
         'testcase_directory': os.path.abspath(testcase_directory),
         'wa_list': wa_list,
     }
