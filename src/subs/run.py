@@ -8,16 +8,17 @@ from hashlib import sha1
 import json
 
 commands = {
-    '.cpp': 'g++ {filename} -o {runame} -O2 -Wall -static -std=gnu++20 -Wfatal-errors',
+    '.cpp': 'g++ {filepath} -o {runame} -O2 -Wall -static -std=gnu++20 -Wfatal-errors',
     '.py': 'echo "#!/usr/bin/env python3" > {runame};'
-        'cat {filename} >> {runame};chmod u+x {runame};'
+        'cat {filepath} >> {runame};chmod u+x {runame};'
         'python3 -c "import py_compile; py_compile.compile(\'{runame}\')"'
 }
 
-def compile(filename):
+def compile(filepath):
     # Prepare
-    name, ext = os.path.splitext(filename)
-    tmpdir = os.path.join(os.path.dirname(filename), '.tmp/')
+    basename = os.path.basename(filepath)
+    name, ext = os.path.splitext(basename)
+    tmpdir = os.path.join(os.path.dirname(filepath), '.tmp/')
     if not os.path.exists(tmpdir):
         os.mkdir(tmpdir)
     if ext not in commands:
@@ -27,17 +28,17 @@ def compile(filename):
     # To reduce compile, formatting source code before hashing would be good idea.
 
     # Hash
-    with open(filename, 'rb') as f:
+    with open(filepath, 'rb') as f:
         data = f.read()
         h = sha1(data).hexdigest()
     runame = os.path.join(tmpdir, name + '_' + h[:6])
 
     if os.path.exists(runame):
-        click.echo('Skipping Compile')
+        click.echo(f'Skipping Compile (use {runame})')
         return runame
 
     # Compile
-    command = commands[ext].format(filename=filename, runame=runame)
+    command = commands[ext].format(filepath=filepath, runame=runame)
     click.echo(command)
     return_code = os.system(command)
     if return_code != 0:
@@ -46,25 +47,28 @@ def compile(filename):
 
 
 @click.command()
-@click.argument('filename', type=click.Path(), default="")
+@click.argument('filepath', type=click.Path(), default="")
 @click.option('--testcase-directory', '-tc', default='testcase', type=click.Path(),
               help='testcase directory')
 @click.option('--no-subdirectory', '-N', is_flag = True,
               help='directly find TCs in "testcase-directory/"' +
-              '\ndefault is "testcase-directory/{filename}"')
+              '\ndefault is "testcase-directory/{filepath}"')
 @click.option('--runtime', '-r', is_flag=True, help='Ignore testcase, write data manually')
 @click.option('--timelimit', '-t', default=3, help='time limit')
 @click.option('--copytool', '-c', default='xclip', help='copy command after AC')
-def run(filename, testcase_directory, no_subdirectory, runtime, timelimit, copytool):
+def run(filepath, testcase_directory, no_subdirectory, runtime, timelimit, copytool):
     """Simple Judge Tool"""
     # Preprocess args
-    if not filename or filename == '.':
-        with open('.tmp/recent', 'r') as f:
-            filename = json.load(f)['source_path']
+    if not filepath or filepath == '.':
+        try:
+            with open('.tmp/recent', 'r') as f:
+                filepath = json.load(f)['filepath']
+        except FileNotFoundError:
+            click.echo('There is no recent run. Please specify filepath')
 
-    runame = compile(filename)
+    runame = compile(filepath)
 
-    name, ext = os.path.splitext(filename)
+    name, ext = os.path.splitext(filepath)
     name = (name+' ')[:name.find('_')]
 
     if not no_subdirectory:
@@ -114,14 +118,14 @@ def run(filename, testcase_directory, no_subdirectory, runtime, timelimit, copyt
     click.secho(f'Maximum Time: {maxtime}ms', fg='bright_white')
 
     if AC_cnt == len(input_paths):
-        com = f'{copytool} {filename}'
+        com = f'{copytool} {filepath}'
         click.echo(com)
         os.system(com)
 
-    recent_path = os.path.join(os.path.dirname(filename), '.tmp/recent')
+    recent_path = os.path.join(os.path.dirname(filepath), '.tmp/recent')
     recent = {
         'problem_name': name,
-        'source_path': os.path.abspath(filename),
+        'filepath': filepath,
         'testcase_directory': os.path.abspath(testcase_directory),
         'wa_list': wa_list,
     }
