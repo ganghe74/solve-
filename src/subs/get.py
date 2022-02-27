@@ -12,8 +12,15 @@ headers = {
 sources = {
     'boj': {
         'url': 'https://acmicpc.net/problem/%s',
-        'input': {'id':re.compile('sample-input-\d*')},
-        'ans': {'id':re.compile('sample-output-\d*')}
+        'input': lambda soup: soup.find_all(attrs={'id':re.compile('sample-input-\d*')}),
+        'ans': lambda soup: soup.find_all(attrs={'id':re.compile('sample-output-\d*')}),
+    },
+    'cf-contest': {
+        'url': 'https://codeforces.com/contest/%s/problem/%s',
+        'input': lambda soup: \
+            list(map(lambda div: div.find('pre'), soup.find_all(attrs={'class': 'input'}))),
+        'ans': lambda soup: \
+            list(map(lambda div: div.find('pre'), soup.find_all(attrs={'class': 'output'}))),
     }
 }
 
@@ -25,7 +32,7 @@ def guess_src(src):
 
 @click.command()
 @click.argument('source', nargs=1)
-@click.argument('problem')
+@click.argument('problem', nargs=-1)
 @click.option('--testcase-directory', '-tc', default='testcase', type=click.Path(),
               help='testcase directory')
 @click.option('--no-subdirectory', '-N', is_flag = True,
@@ -34,17 +41,16 @@ def guess_src(src):
 def get(source, problem, testcase_directory, no_subdirectory):
     """Fetch testcase"""
     key, src = guess_src(source)
-    problem = re.sub('(_.*)|(\..*)', '', problem)
     webpage = requests.get(src['url']%problem, headers=headers)
     soup = BeautifulSoup(webpage.content, 'html.parser')
-    INS = soup.find_all(attrs=src['input'])
-    ANS = soup.find_all(attrs=src['ans'])
+    INS = src['input'](soup)
+    ANS = src['ans'](soup)
 
     if len(INS) == 0:
         raise click.ClickException('Cannot find testcases from ' + src['url']%problem)
 
     if not no_subdirectory:
-        testcase_directory = os.path.join(testcase_directory, problem)
+        testcase_directory = os.path.join(testcase_directory, ''.join(problem))
     testcase_directory.rstrip('/')
     testcase_directory += '/'
     if not os.path.exists(testcase_directory):
