@@ -15,7 +15,8 @@ def diff(tool, y):
     testcase_directory = recent['testcase_directory']
     wa_list = recent['wa_list']
     
-    click.secho(f'diff {problem_name}. ', fg='bright_cyan', nl=False)
+    # Echo
+    click.secho(f'diff \'{problem_name}\', ', fg='bright_cyan', nl=False)
     if len(wa_list) == 0:
       click.secho('There is no WA!', fg='bright_cyan')
       exit(0)
@@ -26,12 +27,14 @@ def diff(tool, y):
       click.echo(f'{wa} ({i+1}/{len(wa_list)})')
 
       while True:
-        ch = 'y' if y else input('Show? (y/n/q) >')
+        ch = 'y' if y else input('Show? (y/n/q/yq) >')
         if ch.strip()[0].lower() in 'ynq':
-          if ch == 'y':
+          if ch[0] == 'y':
             out = os.path.join(testcase_directory, wa + '.out')
             ans = os.path.join(testcase_directory, wa + '.ans')
             os.system(f'{tool} {out} {ans}')
+            if ch == 'yq':
+              exit(0)
             break
           elif ch == 'q':
             exit(0)
