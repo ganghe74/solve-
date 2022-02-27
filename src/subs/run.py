@@ -6,6 +6,7 @@ import subprocess
 import time
 from hashlib import sha1
 import json
+import re
 
 commands = {
     '.cpp': 'g++ {filepath} -o {runame} -O2 -Wall -static -std=gnu++20 -Wfatal-errors',
@@ -14,13 +15,29 @@ commands = {
         'python3 -c "import py_compile; py_compile.compile(\'{runame}\')"'
 }
 
+def preprocess(filepath, testcase_directory, no_subdirectory):
+    if re.match('^$|\.', filepath):
+        try:
+            with open('.tmp/recent', 'r') as f:
+                filepath = json.load(f)['filepath']
+        except FileNotFoundError:
+            click.echo('There is no recent run. Please specify filepath')
+    
+    basename = os.path.basename(filepath)
+    name, ext = os.path.splitext(basename)
+    name = (name+' ')[:name.find('_')]
+
+    if not no_subdirectory:
+        testcase_directory = os.path.join(testcase_directory, name)
+    return filepath, testcase_directory, name
+
 def compile(filepath):
     # Prepare
     basename = os.path.basename(filepath)
     name, ext = os.path.splitext(basename)
-    tmpdir = os.path.join(os.path.dirname(filepath), '.tmp/')
-    if not os.path.exists(tmpdir):
-        os.mkdir(tmpdir)
+
+    if not os.path.exists('.tmp'):
+        os.mkdir('.tmp')
     if ext not in commands:
         raise click.ClickException(f'Cannot find compile command ({ext})')
 
@@ -31,7 +48,7 @@ def compile(filepath):
     with open(filepath, 'rb') as f:
         data = f.read()
         h = sha1(data).hexdigest()
-    runame = os.path.join(tmpdir, name + '_' + h[:6])
+    runame = os.path.join('.tmp', name + '_' + h[:6])
 
     if os.path.exists(runame):
         click.echo(f'Skipping Compile (use {runame})')
@@ -59,45 +76,39 @@ def compile(filepath):
 def run(filepath, testcase_directory, no_subdirectory, runtime, timelimit, copytool):
     """Simple Judge Tool"""
     # Preprocess args
-    if not filepath or filepath == '.':
-        try:
-            with open('.tmp/recent', 'r') as f:
-                filepath = json.load(f)['filepath']
-        except FileNotFoundError:
-            click.echo('There is no recent run. Please specify filepath')
+    filepath, testcase_directory, pname = preprocess(filepath, testcase_directory, no_subdirectory)
 
+    # Compile
     runame = compile(filepath)
 
-    name, ext = os.path.splitext(filepath)
-    name = (name+' ')[:name.find('_')]
-
-    if not no_subdirectory:
-        testcase_directory = os.path.join(testcase_directory, name)
-    testcase_directory.rstrip('/')
-    testcase_directory += '/'
-
-    input_paths = sorted(glob.glob(f'{testcase_directory}/*.in'))
-    if not runtime and len(input_paths) == 0:
+    # Find testcases
+    in_paths = sorted(glob.glob(os.path.join(testcase_directory, '*.in')))
+    if not runtime and len(in_paths) == 0:
         click.secho('No input data!', fg='bright_red')
         runtime = True
+
+    # Check runtime
     if runtime:
         click.secho(f'Runtime Mode ({runame})', fg='bright_cyan')
         os.system(runame)
-        return
+        exit(0)
 
+    # Judge!
     maxtime = 0
-    align_length = max([len(s) for s in input_paths]) - len(testcase_directory) - 3
+    align_length = max([len(s) for s in in_paths]) - len(testcase_directory) - 3
     wa_list = []
     AC_cnt = 0
-    for input_path in input_paths:
-        output_path = input_path[:-3] + '.out'
-        answer_path = input_path[:-3] + '.ans'
-        tc_name = input_path[len(testcase_directory):-3]
-        click.echo(tc_name.rjust(align_length) + ' ', nl=False)
+    for in_path in in_paths:
+        path, ext = os.path.splitext(in_path)
+        tcname = os.path.basename(path)
+        out_path = path + '.out'
+        ans_path = path + '.ans'
+
+        click.echo(tcname.rjust(align_length) + ' ', nl=False)
         start_time = time.time_ns()
-        with open(input_path, 'r') as input_file, open(output_path, 'w') as output_file:
+        with open(in_path, 'r') as input_file, open(out_path, 'w') as f:
             try:
-                result = subprocess.run([runame], stdin=input_file, stdout=output_file, timeout=timelimit)
+                result = subprocess.run([runame], stdin=input_file, stdout=f, timeout=timelimit)
             except subprocess.TimeoutExpired:
                 maxtime = timelimit * 1000
                 click.secho('TLE', fg='bright_red')
@@ -106,30 +117,31 @@ def run(filepath, testcase_directory, no_subdirectory, runtime, timelimit, copyt
         maxtime = max(maxtime, tc_time)
         if result.returncode != 0:
             click.secho('RTE ', fg='bright_blue', nl=False)
-        elif not os.path.isfile(answer_path):
+        elif not os.path.isfile(ans_path):
             click.secho('? (no ans data)', fg='bright_black', nl=False)
-        elif os.system(f'diff -wB {output_path} {answer_path} > /dev/null') != 0:
+        elif os.system(f'diff -wB {out_path} {ans_path} > /dev/null') != 0:
             click.secho('WA  ', fg='bright_red', nl=False)
-            wa_list.append(tc_name)
+            wa_list.append(tcname)
         else:
             click.secho('AC  ', fg='bright_green', nl=False)
             AC_cnt += 1
         click.echo(f'{tc_time}ms')
     click.secho(f'Maximum Time: {maxtime}ms', fg='bright_white')
 
-    if AC_cnt == len(input_paths):
+    if AC_cnt == len(in_paths):
         com = f'{copytool} {filepath}'
         click.echo(com)
         os.system(com)
 
-    recent_path = os.path.join(os.path.dirname(filepath), '.tmp/recent')
+    # Write recent info
     recent = {
-        'problem_name': name,
+        'problem_name': pname,
         'filepath': filepath,
         'testcase_directory': os.path.abspath(testcase_directory),
         'wa_list': wa_list,
     }
-    with open(recent_path, 'w') as f:
+
+    with open('.tmp/recent', 'w') as f:
         json.dump(recent, f)
 
 
