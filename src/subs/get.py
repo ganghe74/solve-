@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import click
-import glob
 import requests
 import re
 import os
@@ -21,7 +20,7 @@ sources = {
 def guess_src(src):
     for key, val in sources.items():
         if key.startswith(src):
-            return val
+            return key, val
     raise click.ClickException('Invalid source ' + src)
 
 @click.command()
@@ -34,7 +33,7 @@ def guess_src(src):
               '\ndefault is "testcase-directory/{filename}"')
 def get(source, problem, testcase_directory, no_subdirectory):
     """Fetch testcase"""
-    src = guess_src(source)
+    key, src = guess_src(source)
     problem = re.sub('(_.*)|(\..*)', '', problem)
     webpage = requests.get(src['url']%problem, headers=headers)
     soup = BeautifulSoup(webpage.content, 'html.parser')
@@ -56,7 +55,8 @@ def get(source, problem, testcase_directory, no_subdirectory):
             f.write(IN.text.strip().replace('\r',''))
         with open(testcase_directory + str(i) + '.ans', 'w') as f:
             f.write(AN.text.strip().replace('\r',''))
-    click.echo(f'Successfully crawled {len(INS)} testcases')
+    click.echo(f'Successfully crawled {len(INS)} testcases ', nl=False)
+    click.secho(f'from {key}', fg='bright_black')
 
 if __name__ == '__main__':
     get()
