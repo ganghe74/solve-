@@ -54,8 +54,10 @@ def compile(filename):
               '\ndefault is "testcase-directory/{filename}"')
 @click.option('--runtime', '-r', is_flag=True, help='Ignore testcase, write data manually')
 @click.option('--timelimit', '-t', default=3, help='time limit')
-def run(filename, testcase_directory, no_subdirectory, runtime, timelimit):
+@click.option('--copytool', '-c', default='xclip', help='copy command after AC')
+def run(filename, testcase_directory, no_subdirectory, runtime, timelimit, copytool):
     """Simple Judge Tool"""
+    # Preprocess args
     if not filename or filename == '.':
         with open('.tmp/recent', 'r') as f:
             filename = json.load(f)['source_path']
@@ -82,6 +84,7 @@ def run(filename, testcase_directory, no_subdirectory, runtime, timelimit):
     maxtime = 0
     align_length = max([len(s) for s in input_paths]) - len(testcase_directory) - 3
     wa_list = []
+    AC_cnt = 0
     for input_path in input_paths:
         output_path = input_path[:-3] + '.out'
         answer_path = input_path[:-3] + '.ans'
@@ -106,8 +109,14 @@ def run(filename, testcase_directory, no_subdirectory, runtime, timelimit):
             wa_list.append(tc_name)
         else:
             click.secho('AC  ', fg='bright_green', nl=False)
+            AC_cnt += 1
         click.echo(f'{tc_time}ms')
     click.secho(f'Maximum Time: {maxtime}ms', fg='bright_white')
+
+    if AC_cnt == len(input_paths):
+        com = f'{copytool} {filename}'
+        click.echo(com)
+        os.system(com)
 
     recent_path = os.path.join(os.path.dirname(filename), '.tmp/recent')
     recent = {
