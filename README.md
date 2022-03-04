@@ -16,7 +16,7 @@ pip install .
 
 ```bash
 solve get boj 1000
-solve tc 1000 2
+solve tc 2 -p 1000
 solve run 1000.cpp
 solve diff
 ```
