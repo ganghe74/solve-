@@ -16,11 +16,11 @@ def diff(tool, y):
     wa_list = recent['wa_list']
     
     # Echo
-    click.secho(f'diff \'{problem_name}\', ', fg='bright_cyan', nl=False)
+    click.secho(f'diff. problem \'{problem_name}\', ', fg='bright_cyan', nl=False)
     if len(wa_list) == 0:
       click.secho('There is no WA!', fg='bright_cyan')
       exit(0)
-    click.secho(f'{len(wa_list)} WA({", ".join(wa_list)})', fg='bright_cyan', nl=False)
+    click.secho(f'There is {len(wa_list)} WA(s)({", ".join(wa_list)})', fg='bright_cyan', nl=False)
     click.secho(f' {tool}', fg='blue')
     
     for i, wa in enumerate(wa_list):

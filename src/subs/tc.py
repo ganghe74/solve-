@@ -36,11 +36,11 @@ def tc(testcases, problem, testcase_directory, no_subdirectory, tool, y):
   os.makedirs(testcase_directory, exist_ok=True)
 
   # Echo
-  click.secho(f'tc \'{problem}\', ', fg='bright_cyan', nl=False)
+  click.secho(f'tc. problem \'{problem}\', ', fg='bright_cyan', nl=False)
   if len(testcases) == 0:
     click.secho('There is no TC!', fg='bright_cyan')
     exit(0)
-  click.secho(f'{len(testcases)} TC({", ".join(testcases)})', fg='bright_cyan', nl=False)
+  click.secho(f'There is {len(testcases)} TC(s)({", ".join(testcases)})', fg='bright_cyan', nl=False)
   click.secho(f' {tool}', fg='blue')
 
   # Open
