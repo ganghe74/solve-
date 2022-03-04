@@ -5,8 +5,8 @@ import json
 import glob
 
 @click.command()
-@click.argument('problem', nargs=1)
 @click.argument('testcases', nargs=-1)
+@click.option('--problem', '-p', default='.', help="problem name of testcase")
 @click.option('--testcase-directory', '-tc', default='testcase', type=click.Path(),
               help='testcase directory')
 @click.option('--no-subdirectory', '-N', is_flag = True,
@@ -14,7 +14,7 @@ import glob
               '\ndefault is "testcase-directory/{filename}"')
 @click.option('--tool', '-t', default='vim', help='your editor command')
 @click.option('-y', is_flag=True, help='do not ask')
-def tc(problem, testcases, testcase_directory, no_subdirectory, tool, y):
+def tc(testcases, problem, testcase_directory, no_subdirectory, tool, y):
   """Open testcases with editor"""
   # Preprocess Args
   problem, ext = os.path.splitext(problem)
