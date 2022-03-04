@@ -28,7 +28,7 @@ def diff(tool, y):
 
       while True:
         ch = 'y' if y else input('Show? (y/n/q/yq) >')
-        if ch.strip()[0].lower() in 'ynq':
+        if ch and ch.strip()[0].lower() in 'ynq':
           if ch[0] == 'y':
             out = os.path.join(testcase_directory, wa + '.out')
             ans = os.path.join(testcase_directory, wa + '.ans')

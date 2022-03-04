@@ -48,7 +48,7 @@ def tc(problem, testcases, testcase_directory, no_subdirectory, tool, y):
     click.echo(f'{tc} ({i+1}/{len(testcases)})')
     while True:
       ch = 'y' if y else input('Open? (y/n/q/yq) >')
-      if ch.strip()[0].lower() in 'ynq':
+      if ch and ch.strip()[0].lower() in 'ynq':
         if ch[0] == 'y':
           inn = os.path.join(testcase_directory, tc + '.in')
           ans = os.path.join(testcase_directory, tc + '.ans')
