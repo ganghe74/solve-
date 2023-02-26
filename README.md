@@ -7,9 +7,7 @@ a small cli tool for ps
 ## install
 
 ```bash
-git clone https://github.com/ganghe74/solve
-cd solve
-pip install .
+pip install --user solve-ps
 ```
 
 ## Usage
