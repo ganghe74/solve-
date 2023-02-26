@@ -1,8 +1,8 @@
 import click
-from solve.subs.run import run
-from solve.subs.get import get
-from solve.subs.diff import diff
-from solve.subs.tc import tc
+from solve_ps.subs.run import run
+from solve_ps.subs.get import get
+from solve_ps.subs.diff import diff
+from solve_ps.subs.tc import tc
 
 @click.group()
 def cli():
