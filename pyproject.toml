@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "solve"
+version = "0.1.0"
+description = "a small cli tool for ps"
+authors = ["KH <ganghe74@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+click = "^8.1.3"
+requests = "^2.28.2"
+beautifulsoup4 = "^4.11.2"
+
+[tool.poetry.scripts]
+solve-dev = "solve:main.cli"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
