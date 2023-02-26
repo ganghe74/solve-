@@ -22,10 +22,10 @@ def preprocess(filepath, testcase_directory, no_subdirectory):
                 filepath = json.load(f)['filepath']
         except FileNotFoundError:
             click.echo('There is no recent run. Please specify filepath')
-    
+
     basename = os.path.basename(filepath)
     name, ext = os.path.splitext(basename)
-    name = (name+' ')[:name.find('_')]
+    name = re.sub('[-_].*', '', name)
 
     if not no_subdirectory:
         testcase_directory = os.path.join(testcase_directory, name)
