@@ -9,10 +9,11 @@ import json
 import re
 
 commands = {
-    '.cpp': 'g++ {filepath} -o {runame} -O2 -Wall -static -std=gnu++20 -Wfatal-errors',
+    '.c': 'gcc {filepath} -o {runame} -O2 -Wall -lm -static -std=gnu11 -Wfatal-errors',
+    '.cpp': 'g++ {filepath} -o {runame} -O2 -Wall -lm -static -std=gnu++2a -Wfatal-errors',
     '.py': 'echo "#!/usr/bin/env python3" > {runame};'
         'cat {filepath} >> {runame};chmod u+x {runame};'
-        'python3 -c "import py_compile; py_compile.compile(\'{runame}\')"'
+        'python3 -c "import py_compile; py_compile.compile(\'{runame}\')"',
 }
 
 def preprocess(filepath, testcase_directory, no_subdirectory):
