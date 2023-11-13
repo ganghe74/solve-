@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "solve-ps"
 version = "0.1.0"
-description = "a small cli tool for ps"
+description = "a cli tool for ps"
 authors = ["KH <ganghe74@gmail.com>"]
 readme = "README.md"
 
@@ -12,7 +12,7 @@ requests = "^2.28.2"
 beautifulsoup4 = "^4.11.2"
 
 [tool.poetry.scripts]
-solve = "solve_ps:main.cli"
+solve = "solve_ps.main:cli"
 
 [build-system]
 requires = ["poetry-core"]
