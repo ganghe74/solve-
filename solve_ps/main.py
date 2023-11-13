@@ -5,8 +5,9 @@ from solve_ps.subs.diff import diff
 from solve_ps.subs.tc import tc
 
 @click.group()
+@click.version_option()
 def cli():
-    pass
+    ...
 
 cli.add_command(run)
 cli.add_command(get)
