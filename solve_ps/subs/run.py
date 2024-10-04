@@ -14,6 +14,10 @@ commands = {
     ".py": 'echo "#!/usr/bin/env python3" > {runame};'
         "cat {filepath} >> {runame};chmod u+x {runame};"
         "python3 -c \"import py_compile; py_compile.compile('{runame}')\"",
+    ".cs": 'dotnet new console --force -o .tmp/cs && '
+        "cp {filepath} .tmp/cs/Program.cs && "
+        "dotnet publish .tmp/cs --configuration Release --self-contained true --runtime linux-x64 /p:PublishSingleFile=true --framework net8.0 &&"
+        "mv .tmp/cs/bin/Release/net8.0/linux-x64/publish/cs {runame}"
 }
 
 
