@@ -17,7 +17,8 @@ commands = {
     ".cs": 'dotnet new console --force -o .tmp/cs && '
         "cp {filepath} .tmp/cs/Program.cs && "
         "dotnet publish .tmp/cs --configuration Release --self-contained true --runtime linux-x64 /p:PublishSingleFile=true --framework net8.0 &&"
-        "mv .tmp/cs/bin/Release/net8.0/linux-x64/publish/cs {runame}"
+        "mv .tmp/cs/bin/Release/net8.0/linux-x64/publish/cs {runame}",
+    ".rs": "rustc --edition 2018 -O -o {runame} {filepath}"
 }
 
 
