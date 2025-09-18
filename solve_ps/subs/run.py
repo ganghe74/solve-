@@ -11,6 +11,9 @@ import re
 commands = {
     ".c": "gcc {filepath} -o {runame} -O2 -Wall -lm -static -std=gnu11 -Wfatal-errors",
     ".cpp": "g++ {filepath} -o {runame} -O2 -Wall -lm -static -std=gnu++2a -Wfatal-errors",
+    ".java": "echo '#!/bin/sh' > {runame} && "
+        "echo 'exec java {filepath} \"$@\"' >> {runame} && "
+        "chmod u+x {runame}",
     ".py": 'echo "#!/usr/bin/env python3" > {runame};'
         "cat {filepath} >> {runame};chmod u+x {runame};"
         "python3 -c \"import py_compile; py_compile.compile('{runame}')\"",

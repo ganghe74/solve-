@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "solve-ps"
-version = "0.1.3"
+version = "0.1.4"
 description = "a cli tool for ps"
 authors = ["KH <ganghe74@gmail.com>"]
 readme = "README.md"
